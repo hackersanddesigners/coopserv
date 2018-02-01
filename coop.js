@@ -7,7 +7,6 @@ const cc = web3.eth.contract(abi.abi);
 const ci = cc.at(addr.contractAddress);
 
 exports.addMember = (from, name, addr) => { 
-  console.log(from, name, addr);
   return new Promise((resolve, reject) => {
     ci.addMember(
       addr,
@@ -84,9 +83,6 @@ exports.distributeBudget = (from) => {
 
 exports.getParticipants = actId => {
   return ci.getParticipants.call(actId);
-//    .map( p => {
-//    parseInt(p.toString());
-//  });
 };
 
 exports.addParticipant = (from, memId, actId) => {
@@ -115,7 +111,16 @@ exports.removeParticipant = (from, memId, actId) => {
   });
 };
 
+exports.getVoteIds = actId => {
+  return ci.getVoteIds.call(actId);
+};
+
+exports.getVote = voteId => {
+  return ci.getVote.call(voteId);
+};
+
 exports.vote = (from, actId, prom, just) => {
+  console.log(from, actId, prom, just);
   return new Promise(resolve => {
     ci.vote(
       actId,

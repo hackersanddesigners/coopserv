@@ -7,6 +7,6 @@
     "compression": "",
     "cookie-session": "",
     "body-parser": "",
-    "web3": ""
+    "web3": "0.19.0"
   }
 }

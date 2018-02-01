@@ -4,7 +4,8 @@ const connect = require('connect'),
   session = require('cookie-session'),
   bodyParser = require('body-parser'),
   urlparser = require('url')
-  coop = require('./coop');
+  coop = require('./coop'),
+  creds = require('../creds');
 
 function fail(req, res, obj) {
   res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -21,6 +22,7 @@ async function processRequest(req, res) {
 
   if(url.pathname == '/api/activities') {
     if(req.method == 'POST') {
+      console.log(req.session.addr);
       sendRes(req, res, await coop.addActivity(
         req.session.addr,
         req.body.cost,
@@ -58,6 +60,7 @@ async function processRequest(req, res) {
       req.session.addr, req.body.memId, req.body.actId));
   } else if(url.pathname == '/api/votes') {
     if(req.method == 'POST') {
+      coop.unlockAccount(req.session.addr, req.session.pwd);
       sendRes(req, res, await coop.vote(
         req.session.addr,
         req.body.actId,
@@ -66,7 +69,7 @@ async function processRequest(req, res) {
     } else if(url.query.actId) {
       sendRes(req, res, coop.getVoteIds(url.query.actId));
     } else if(url.query.voteId) {
-      sendRes(req, res, coop.getVote(url.query.actId));
+      sendRes(req, res, coop.getVote(url.query.voteId));
     }
   } else if(url.pathname == '/api/finalize') {
     sendRes(req, res, await coop.finalize(req.session.addr, req.body.actId));
@@ -74,6 +77,8 @@ async function processRequest(req, res) {
     sendRes(req, res, coop.getAddress(req.session.actnum));
   }
 }
+
+var creds = creds.creds;
 
 var app = connect();
 
@@ -96,11 +101,10 @@ app.use((req, res, next) => {
     res.end('Done.\n');  
     return;
   } else if(url.pathname == '/api/login' &&
-    req.body.name == 'jbg' &&
-    req.body.pwd == '<YOUR_PASSPHRASE>') {
-      req.session.actnum = 0;
+    creds[req.body.name].pwd == req.body.pwd) {
       req.session.auth = true;
-      req.session.addr = coop.getAddress(req.session.actnum);
+      req.session.addr = creds[req.body.name].addr; 
+      req.session.pwd = req.body.pwd; 
       console.log(req.session.addr, req.body.pwd);
       coop.unlockAccount(req.session.addr, req.body.pwd);
       next();
