@@ -22,12 +22,12 @@ async function processRequest(req, res) {
 
   if(url.pathname == '/api/activities') {
     if(req.method == 'POST') {
-      console.log(req.session.addr);
       sendRes(req, res, await coop.addActivity(
         req.session.addr,
         req.body.cost,
         req.body.title,
-        req.body.description
+        req.body.description,
+        req.body.global == 'false' ? false : true
       ));
     } else if(url.query.actId) {
       sendRes(req, res, coop.getActivity(url.query.actId));
@@ -74,7 +74,7 @@ async function processRequest(req, res) {
   } else if(url.pathname == '/api/finalize') {
     sendRes(req, res, await coop.finalize(req.session.addr, req.body.actId));
   } else {
-    sendRes(req, res, coop.getAddress(req.session.actnum));
+    sendRes(req, res, { 'user': req.session.user });
   }
 }
 
@@ -98,10 +98,11 @@ app.use((req, res, next) => {
 
   if(url.pathname == '/api/logout') {
     req.session = null;
-    res.end('Done.\n');  
+    sendRes(req, res, {});
     return;
   } else if(url.pathname == '/api/login' &&
     creds[req.body.name].pwd == req.body.pwd) {
+      req.session.user = req.body.name;
       req.session.auth = true;
       req.session.addr = creds[req.body.name].addr; 
       req.session.pwd = req.body.pwd; 

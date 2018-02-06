@@ -55,12 +55,13 @@ exports.getActivities = () => {
   return acts;
 };
 
-exports.addActivity = (from, cost, title, description) => {
+exports.addActivity = (from, cost, title, description, global) => {
   return new Promise(resolve => {
     ci.addActivity(
       cost,
       title,
       description, 
+      global,
       {from: from, gas:1000000},
       () => {
         resolve({ 'msg': 'Activity added.' });
