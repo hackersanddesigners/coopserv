@@ -27,7 +27,7 @@ async function processRequest(req, res) {
         req.body.cost,
         req.body.title,
         req.body.description,
-        req.body.global == 'false' ? false : true
+        req.body.global == 'true'
       ));
     } else if(url.query.actId) {
       sendRes(req, res, coop.getActivity(url.query.actId));
@@ -71,6 +71,9 @@ async function processRequest(req, res) {
     } else if(url.query.voteId) {
       sendRes(req, res, coop.getVote(url.query.voteId));
     }
+  } else if(url.pathname == '/api/votes/delete') {
+    sendRes(req, res, await coop.deleteVote(
+      req.session.addr, req.body.voteId));
   } else if(url.pathname == '/api/finalize') {
     sendRes(req, res, await coop.finalize(req.session.addr, req.body.actId));
   } else {

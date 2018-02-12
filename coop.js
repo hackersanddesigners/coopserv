@@ -62,7 +62,7 @@ exports.addActivity = (from, cost, title, description, global) => {
       title,
       description, 
       global,
-      {from: from, gas:1000000},
+      {from: from, gas:4000000},
       () => {
         resolve({ 'msg': 'Activity added.' });
       }
@@ -130,6 +130,18 @@ exports.vote = (from, actId, prom, just) => {
       {from: from, gas:1000000},
       () => {
         resolve('Vote added.');
+      }
+    );
+  });
+};
+
+exports.deleteVote = (from, voteId) => {
+  return new Promise(resolve => {
+    ci.deleteVote(
+      voteId,
+      {from: from, gas:1000000},
+      () => {
+        resolve('Vote removed.');
       }
     );
   });
