@@ -3,9 +3,9 @@ const connect = require('connect'),
   compression = require('compression'),
   session = require('cookie-session'),
   bodyParser = require('body-parser'),
-  urlparser = require('url')
+  urlparser = require('url'),
   coop = require('./coop'),
-  creds = require('../creds');
+  credents = require('../creds');
 
 function fail(req, res, obj) {
   res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -81,15 +81,30 @@ async function processRequest(req, res) {
   }
 }
 
-var creds = creds.creds;
+var creds = credents.creds;
 
 var app = connect();
 
 app.use(compression());
 
+//app.use(session({
+//    keys: ['secret1', 'secret2']
+//}));
+
 app.use(session({
-    keys: ['secret1', 'secret2']
+  name: 'session',
+  keys: ['secret1', 'secret2'],
+  maxAge: 10 * 60 * 1000
 }));
+
+// This allows you to set req.session.maxAge to let certain sessions
+// have a different value than the default.
+app.use(function (req, res, next) {
+  req.sessionOptions.maxAge = req.session.maxAge || req.sessionOptions.maxAge;
+  next();
+})
+
+
 
 app.use(bodyParser.urlencoded({extended: false}));
 
@@ -105,6 +120,7 @@ app.use((req, res, next) => {
     return;
   } else if(url.pathname == '/api/login' &&
     creds[req.body.name].pwd == req.body.pwd) {
+      req.session.maxAge = 15 * 60 * 1000;
       req.session.user = req.body.name;
       req.session.auth = true;
       req.session.addr = creds[req.body.name].addr; 
